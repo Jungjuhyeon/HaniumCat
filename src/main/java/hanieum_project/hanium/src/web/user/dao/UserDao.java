@@ -1,6 +1,7 @@
 package hanieum_project.hanium.src.web.user.dao;
 
 import hanieum_project.hanium.src.web.user.dto.*;
+import hanieum_project.hanium.util.jwt.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -74,5 +75,20 @@ public class UserDao {
                         rs.getString("email")
                 ),userIdx);
     }
+
+    public User login(PostLoginReq postLoginReq) {
+        String query = "SELECT * FROM User WHERE users_id = ?";
+
+        return this.jdbcTemplate.queryForObject(query,
+                (rs,rownum) -> new User(
+                        rs.getInt("userIdx"),
+                        rs.getString("username"),
+                        rs.getString("users_id"),
+                        rs.getString("password"),
+                        rs.getString("email"),
+                        rs.getString("phone")
+                        ),postLoginReq.getUsers_id());
+    }
+
 
 }
