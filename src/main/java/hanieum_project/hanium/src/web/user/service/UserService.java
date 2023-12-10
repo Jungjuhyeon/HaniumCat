@@ -3,10 +3,8 @@ package hanieum_project.hanium.src.web.user.service;
 import hanieum_project.hanium.config.BaseException;
 import hanieum_project.hanium.src.web.user.dao.UserDao;
 import hanieum_project.hanium.src.web.user.dto.*;
+import hanieum_project.hanium.util.EncryptHelper;
 import hanieum_project.hanium.util.jwt.JwtService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,11 +20,13 @@ public class UserService {
 
     private final UserDao userDao;
     private final JwtService jwtService;
+    private final EncryptHelper encryptHelper;
 
     @Autowired
-    public UserService(UserDao userDao, JwtService jwtService) {
+    public UserService(UserDao userDao, JwtService jwtService, EncryptHelper encryptHelper) {
         this.userDao = userDao;
         this.jwtService = jwtService;
+        this.encryptHelper = encryptHelper;
     }
 
     public UserDetails loadUserByUserIdx(Long userId){
@@ -35,9 +35,17 @@ public class UserService {
 
     @Transactional(rollbackFor = BaseException.class)
     public PostSignUpRes signUp(PostSignUpReq postSignUpReq) throws BaseException {
+
+        //비밀번호 Bcrypt암호화
+        try{
+            String encryptedPW= encryptHelper.encrypt(postSignUpReq.getPassword());
+            postSignUpReq.setPassword(encryptedPW);
+        } catch (Exception ignored){
+            throw new BaseException(PASSWORD_ENCRYPTION_ERROR);
+        }
+
         try {
             int userIdx = userDao.signUp(postSignUpReq);
-
             PostSignUpRes postSignUpRes = userDao.selectUserId(userIdx);
             return postSignUpRes;
         } catch (Exception exception) {

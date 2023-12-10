@@ -17,7 +17,8 @@ public class UserDao {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public void serDataSource(DataSource dataSource){
+    public void setDataSource(DataSource dataSource){
+
         this.jdbcTemplate =new JdbcTemplate(dataSource);
     }
 
@@ -39,7 +40,6 @@ public class UserDao {
      * 23.11.07 작성자 : 정주현
      * 회원가입 INSERT 쿼리
      */
-    @Transactional
     public int signUp(PostSignUpReq postSignUpReq){
 
         String query = "INSERT INTO User(username, users_id, password, email, phone)\n" +
